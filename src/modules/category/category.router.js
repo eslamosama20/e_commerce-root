@@ -12,9 +12,18 @@ router.post(
   "/",
   isAuthenticated,
   isAuthorized("admin"),
-  fileUpload().single("category"),
+  fileUpload().single("file"),
   validation(categorySchema.createCategory),
   categoryController.createCategory
+);
+// upate
+router.put(
+  "/:id",
+  isAuthenticated,
+  isAuthorized("admin"),
+  fileUpload().single("file"),
+  validation(categorySchema.updateCategory),
+  categoryController.updateCategory
 );
 
 export default router;

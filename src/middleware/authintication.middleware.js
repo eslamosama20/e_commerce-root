@@ -11,7 +11,7 @@ export const isAuthenticated = asyncHandler(async (req, res, next) => {
   }
   // extract payload from token
   token = token.split(process.env.BEARER_KEY)[1];
-  payload = Jwt.verify(token, process.env.JWT_SECRET);
+  const payload = Jwt.verify(token, process.env.JWT_SECRET);
   // check token in database
   const tokenDB = Token.findOne({ token, isValid: true });
   if (!tokenDB) {

@@ -1,3 +1,8 @@
+import { Types } from "mongoose";
+export const isValidateObjectId = (value, helpers) => {
+  if (Types.ObjectId.isValid(value)) return value;
+  return helpers.message("Invalid ObjectId format");
+};
 export const validation = (schema) => {
   return (req, res, next) => {
     const data = { ...req.body, ...req.params, ...req.query };

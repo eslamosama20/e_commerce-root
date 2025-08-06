@@ -1,12 +1,19 @@
-import multer, { diskStorage } from "multer";
+// utils/fileUpload.js
+import multer from "multer";
 
 export const fileUpload = () => {
   const fileFilter = (req, file, cb) => {
-    if (!["image/png", "image/jpg", "image/jpeg"].includes(file.mimetype)) {
-      cb(new Error("Only .png, .jpg and .jpeg format allowed!"), false);
+    const allowedTypes = ["image/png", "image/jpg", "image/jpeg"];
+    if (!allowedTypes.includes(file.mimetype)) {
+      cb(new Error("Only .png, .jpg and .jpeg formats are allowed!"), false);
     } else {
       cb(null, true);
     }
   };
-  return multer({ Storage: diskStorage({}), fileFilter });
+
+  return multer({
+    storage: multer.memoryStorage(), // مهم جدًا!
+    fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 },
+  });
 };

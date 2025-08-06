@@ -25,5 +25,18 @@ router.put(
   validation(categorySchema.updateCategory),
   categoryController.updateCategory
 );
+// delete
+router.delete(
+  "/:id",
+  isAuthenticated,
+  isAuthorized("admin"),
+  validation(categorySchema.deleteCategory),
+  categoryController.deleteCategory
+);
+// get all
+router.get(
+  "/",
 
+  categoryController.getAllCategories
+);
 export default router;

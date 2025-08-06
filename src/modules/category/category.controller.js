@@ -53,7 +53,9 @@ export const updateCategory = asyncHandler(async (req, res, next) => {
   if (!category)
     return next(new Error("category is not found !", { cause: 404 }));
   // check category Owner
-  if (req.user._id.toString() !== category.createdBy.toString());
+  if (req.user._id.toString() !== category.createdBy.toString())
+    return next(new Error("You are not authorized !", { cause: 403 }));
+
   // check file >>>>upload file in cloudinary
   if (req.file) {
     const uploadFromBuffer = (fileBuffer, publicId) => {
@@ -97,5 +99,33 @@ export const updateCategory = asyncHandler(async (req, res, next) => {
       slug: category.slug,
       image: category.image,
     },
+  });
+});
+export const deleteCategory = asyncHandler(async (req, res, next) => {
+  // check category in DB
+  const category = await Category.findById(req.params.id);
+  if (!category)
+    return next(new Error("category is not found !", { cause: 404 }));
+
+  // check category Owner
+  if (req.user._id.toString() !== category.createdBy.toString())
+    return next(new Error("You are not authorized !", { cause: 403 }));
+
+  // delete category from DB
+  await Category.findByIdAndDelete(req.params.id);
+  // delete image from cloudinary
+  await cloudinary.uploader.destroy(category.image.id);
+
+  // return response
+  res.status(200).json({
+    success: true,
+    message: "Category deleted successfully",
+  });
+});
+export const getAllCategories = asyncHandler(async (req, res, next) => {
+  const categories = await Category.find();
+  res.status(200).json({
+    success: true,
+    categories,
   });
 });

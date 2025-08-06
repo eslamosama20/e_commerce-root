@@ -7,3 +7,6 @@ export const updateCategory = Joi.object({
   name: Joi.string().min(3).max(30).optional(),
   id: Joi.string().custom(isValidateObjectId).required(),
 }).required();
+export const deleteCategory = Joi.object({
+  id: Joi.string().custom(isValidateObjectId).required(),
+});

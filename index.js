@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { connectDB } from "./DB/connection.js";
 import { authRouter } from "./src/modules/auth/auth.router.js";
 import categoryRouter from "./src/modules/category/category.router.js";
+import subCategoryRouter from "./src/modules/subCategory/subCategory.routes.js";
 dotenv.config();
 const app = express();
 const port = process.env.PORT;
@@ -14,6 +15,7 @@ await connectDB();
 console.log("Connecting to auth router");
 app.use("/auth", authRouter);
 app.use("/category", categoryRouter);
+app.use("/subCategory", subCategoryRouter);
 
 //page not found handler
 app.all(/.*/, (req, res, next) => {

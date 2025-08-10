@@ -12,7 +12,7 @@ export const fileUpload = () => {
   };
 
   return multer({
-    storage: multer.memoryStorage(), // مهم جدًا!
+    storage: multer.memoryStorage(), // important for buffer upload
     fileFilter,
     limits: { fileSize: 5 * 1024 * 1024 },
   });

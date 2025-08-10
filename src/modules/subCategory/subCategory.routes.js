@@ -1,13 +1,14 @@
+// routes/subCategory.router.js
 import { Router } from "express";
 import { isAuthenticated } from "../../middleware/authintication.middleware.js";
 import { isAuthorized } from "../../middleware/authorization.middleware.js";
 import { fileUpload } from "../../utils/fileUpload.js";
-import * as categoryController from "./category.controller.js";
-import * as categorySchema from "./category.schema.js";
+import * as subCategoryController from "./subCategory.controller.js";
+import * as subCategorySchema from "./subCategory.schema.js";
 import { validation } from "../../middleware/vaildation.middleware.js";
-import SubCategoryRouter from "../subCategory/subCategory.routes.js";
-const router = Router();
-router.use("/:categoryId/subCategory", SubCategoryRouter);
+
+const router = Router({ mergeParams: true });
+
 // CRUD
 // create
 router.post(
@@ -15,30 +16,30 @@ router.post(
   isAuthenticated,
   isAuthorized("admin"),
   fileUpload().single("file"),
-  validation(categorySchema.createCategory),
-  categoryController.createCategory
+  validation(subCategorySchema.createsubCategory),
+  subCategoryController.createSubCategory
 );
-// upate
+// update
 router.put(
   "/:id",
   isAuthenticated,
   isAuthorized("admin"),
   fileUpload().single("file"),
-  validation(categorySchema.updateCategory),
-  categoryController.updateCategory
+  validation(subCategorySchema.updatesubCategory),
+  subCategoryController.updateSubCategory
 );
 // delete
 router.delete(
   "/:id",
   isAuthenticated,
   isAuthorized("admin"),
-  validation(categorySchema.deleteCategory),
-  categoryController.deleteCategory
+  subCategoryController.deleteSubCategory
 );
-// get all
+// get all subCategories
 router.get(
   "/",
-
-  categoryController.getAllCategories
+  isAuthenticated,
+  isAuthorized("admin"),
+  subCategoryController.getAllSubCategories
 );
 export default router;

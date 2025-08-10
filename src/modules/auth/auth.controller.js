@@ -191,7 +191,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
   user.resetCode = null; // Clear reset code after successful reset
   await user.save();
 
-  // // Optionally, you can log the user out by deleting their token
+  // // Optionally, you can log the user out by deleting their tokens
   const tokens = await Token.find({ userId: user._id });
 
   // invalidate all tokens

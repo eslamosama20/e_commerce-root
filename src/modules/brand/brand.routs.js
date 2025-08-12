@@ -1,43 +1,40 @@
 import { Router } from "express";
+import * as brandController from "./brand.controller.js";
+import * as brandSchema from "./brand.schema.js";
+import { validation } from "../../middleware/vaildation.middleware.js";
 import { isAuthenticated } from "../../middleware/authintication.middleware.js";
 import { isAuthorized } from "../../middleware/authorization.middleware.js";
 import { fileUpload } from "../../utils/fileUpload.js";
-import * as categoryController from "./category.controller.js";
-import * as categorySchema from "./category.schema.js";
-import { validation } from "../../middleware/vaildation.middleware.js";
-import SubCategoryRouter from "../subCategory/subCategory.routes.js";
 const router = Router();
-router.use("/:categoryId/subCategory", SubCategoryRouter);
-// CRUD
+// crud
 // create
 router.post(
   "/",
   isAuthenticated,
   isAuthorized("admin"),
   fileUpload().single("file"),
-  validation(categorySchema.createCategory),
-  categoryController.createCategory
+  validation(brandSchema.createBrand),
+  brandController.createBrand
 );
-// upate
+// update
 router.put(
   "/:id",
   isAuthenticated,
   isAuthorized("admin"),
   fileUpload().single("file"),
-  validation(categorySchema.updateCategory),
-  categoryController.updateCategory
+  validation(brandSchema.updateBrand),
+  brandController.updateBrand
 );
 // delete
 router.delete(
   "/:id",
   isAuthenticated,
   isAuthorized("admin"),
-  categoryController.deleteCategory
+  brandController.deleteBrand
 );
 // get all
-router.get(
-  "/",
+router.get("/", brandController.getAllBrands);
+// get one
+router.get("/:id", brandController.getBrand);
 
-  categoryController.getAllCategories
-);
 export default router;

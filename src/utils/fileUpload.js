@@ -1,7 +1,21 @@
-// utils/fileUpload.js
 import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// __dirname في ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const fileUpload = () => {
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, path.join(__dirname, "../../uploads")); // مسار مؤقت لحفظ الصور
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + path.extname(file.originalname));
+    },
+  });
+
   const fileFilter = (req, file, cb) => {
     const allowedTypes = ["image/png", "image/jpg", "image/jpeg"];
     if (!allowedTypes.includes(file.mimetype)) {
@@ -11,9 +25,5 @@ export const fileUpload = () => {
     }
   };
 
-  return multer({
-    storage: multer.memoryStorage(), // important for buffer upload
-    fileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 },
-  });
+  return multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 };

@@ -1,7 +1,6 @@
 // controllers/subCategory.controller.js
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { v2 as cloudinary } from "cloudinary";
-import streamifier from "streamifier";
+import cloudinary from "../../utils/cloud.js";
 import { SubCategory } from "../../../DB/models/subCategory.model.js";
 import slugify from "slugify";
 import { Category } from "../../../DB/models/category.model.js";
@@ -12,29 +11,17 @@ export const createSubCategory = asyncHandler(async (req, res, next) => {
   if (!category)
     return next(new Error("category is not found !", { cause: 404 }));
 
-  // check file
   if (!req.file) {
     return next(new Error("Please upload a file", { cause: 400 }));
   }
 
-  // helper to upload buffer to cloudinary
-  const uploadFromBuffer = (buffer) => {
-    return new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: `${process.env.CLOUD_FOULDER_NAME}/subCategory`,
-        },
-        (error, result) => {
-          if (error) return reject(error);
-          resolve(result);
-        }
-      );
-      streamifier.createReadStream(buffer).pipe(uploadStream);
-    });
-  };
-
-  // upload image
-  const result = await uploadFromBuffer(req.file.buffer);
+  // رفع الصورة على Cloudinary
+  const { public_id, secure_url } = await cloudinary.uploader.upload(
+    req.file.path,
+    {
+      folder: `${process.env.CLOUD_FOULDER_NAME}/subCategory`,
+    }
+  );
 
   // save subCategory in DB
   const subCategory = await SubCategory.create({
@@ -42,8 +29,8 @@ export const createSubCategory = asyncHandler(async (req, res, next) => {
     slug: slugify(req.body.name),
     createdBy: req.user._id,
     image: {
-      url: result.secure_url,
-      id: result.public_id,
+      url: secure_url,
+      id: public_id,
     },
     Category: req.params.categoryId,
   });
@@ -58,67 +45,56 @@ export const createSubCategory = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
 export const updateSubCategory = asyncHandler(async (req, res, next) => {
   // check category in DB
   const category = await Category.findById(req.params.categoryId);
   if (!category)
     return next(new Error("category is not found !", { cause: 404 }));
+
   // check subCategory in DB
   const subCategory = await SubCategory.findById(req.params.id);
   if (!subCategory)
     return next(new Error("subCategory is not found !", { cause: 404 }));
-  // check category is perent of subCategory
+
+  // check category is parent of subCategory
   if (category._id.toString() !== subCategory.Category.toString())
     return next(
       new Error("You are not authorized to update this subCategory !", {
         cause: 403,
       })
     );
+
   // check subCategory Owner
   if (req.user._id.toString() !== subCategory.createdBy.toString())
     return next(new Error("You are not authorized !", { cause: 403 }));
-  // check file
-  if (req.file) {
-    // helper to upload buffer to cloudinary
-    const uploadFromBuffer = (buffer, id) => {
-      return new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          {
-            folder: `${process.env.CLOUD_FOULDER_NAME}/subCategory`,
-            public_id: id,
-          },
-          (error, result) => {
-            if (error) return reject(error);
-            resolve(result);
-          }
-        );
-        streamifier.createReadStream(buffer).pipe(uploadStream);
-      });
-    };
 
-    // upload image
-    const result = await uploadFromBuffer(
-      req.file.buffer,
-      subCategory.image.id
+  // رفع الصورة لو فيه فايل جديد
+  if (req.file) {
+    const { public_id, secure_url } = await cloudinary.uploader.upload(
+      req.file.path,
+      {
+        folder: `${process.env.CLOUD_FOULDER_NAME}/subCategory`,
+        public_id: subCategory.image.id, // تحديث نفس الصورة
+      }
     );
 
     subCategory.image = {
-      url: result.secure_url,
-      id: result.public_id,
+      url: secure_url,
+      id: public_id,
     };
   }
 
-  // update subCategory
   if (req.body.name) {
     subCategory.name = req.body.name;
     subCategory.slug = slugify(req.body.name);
   }
-  // save subCategory
+
   await subCategory.save();
-  // return response
+
   res.status(200).json({
     success: true,
-    message: "subCategory updated successfully",
+    message: "SubCategory updated successfully",
     subCategory: {
       name: subCategory.name,
       slug: subCategory.slug,
@@ -126,26 +102,49 @@ export const updateSubCategory = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
 export const deleteSubCategory = asyncHandler(async (req, res, next) => {
-  // check subCategory in DB
   const subCategory = await SubCategory.findById(req.params.id);
   if (!subCategory)
     return next(new Error("subCategory is not found !", { cause: 404 }));
-  // check subCategory Owner
+
   if (req.user._id.toString() !== subCategory.createdBy.toString())
     return next(new Error("You are not authorized !", { cause: 403 }));
-  // delete subCategory
+
+  // حذف الصورة من Cloudinary
+  await cloudinary.uploader.destroy(subCategory.image.id);
+
   await subCategory.deleteOne();
-  // return response
+
   res.status(200).json({
     success: true,
-    message: "subCategory deleted successfully",
+    message: "SubCategory deleted successfully",
   });
 });
+
 export const getAllSubCategories = asyncHandler(async (req, res, next) => {
-  const subCategories = await SubCategory.find({ Category: req.params.id });
+  if (req.params.categoryId !== undefined) {
+    const result = await SubCategory.find({
+      category: req.params.CategoryId,
+    });
+    return res.status(200).json({
+      success: true,
+      result,
+    });
+  }
+
+  const result = await SubCategory.find().populate([
+    {
+      path: "Category",
+      populate: [{ path: "createdBy", select: "email -_id" }],
+    },
+    {
+      path: "createdBy",
+      select: "email -_id",
+    },
+  ]);
   res.status(200).json({
     success: true,
-    subCategories,
+    result,
   });
 });

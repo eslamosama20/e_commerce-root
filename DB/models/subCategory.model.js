@@ -14,6 +14,7 @@ const subCategorySchema = new Schema(
       ref: "Category",
       required: true,
     },
+    brands: [{ type: Types.ObjectId, ref: "Brand" }],
   },
   { timestamps: true }
 );

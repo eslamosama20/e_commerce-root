@@ -13,5 +13,27 @@ router.post(
   validation(couponSchema.createCoupon),
   couponController.createCoupon
 );
-
+// update
+router.patch(
+  "/:name",
+  isAuthenticated,
+  isAuthorized("seller"),
+  validation(couponSchema.updateCoupon),
+  couponController.updateCoupon // Assuming the same controller handles updates
+);
+// delete
+router.delete(
+  "/:name",
+  isAuthenticated,
+  isAuthorized("seller"),
+  validation(couponSchema.deleteCoupon),
+  couponController.deleteCoupon
+);
+// get all
+router.get(
+  "/",
+  isAuthenticated,
+  isAuthorized("seller"),
+  couponController.getCoupons // Assuming you have a controller method for this
+);
 export default router;

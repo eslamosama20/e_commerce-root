@@ -5,6 +5,7 @@ import { authRouter } from "./src/modules/auth/auth.router.js";
 import categoryRouter from "./src/modules/category/category.router.js";
 import subCategoryRouter from "./src/modules/subCategory/subCategory.routes.js";
 import brandRouter from "./src/modules/brand/brand.routs.js";
+import couponRouter from "./src/modules/coupons/coupon.router.js";
 dotenv.config();
 const app = express();
 const port = process.env.PORT;
@@ -18,6 +19,7 @@ app.use("/auth", authRouter);
 app.use("/category", categoryRouter);
 app.use("/subCategory", subCategoryRouter);
 app.use("/brand", brandRouter);
+app.use("/coupons", couponRouter);
 
 //page not found handler
 app.all(/.*/, (req, res, next) => {

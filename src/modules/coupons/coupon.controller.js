@@ -1,6 +1,7 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { Coupon } from "../../../DB/models/coupon.model.js";
 import voucher_code from "voucher-code-generator";
+import e from "express";
 export const createCoupon = asyncHandler(async (req, res) => {
   // generate a unique coupon name
   const code = voucher_code.generate({ length: 5 });
@@ -91,6 +92,26 @@ export const getCoupons = asyncHandler(async (req, res) => {
     status: "success",
     data: {
       coupons,
+    },
+  });
+});
+export const getCoupon = asyncHandler(async (req, res) => {
+  // find the coupon by name
+  const coupon = await Coupon.findOne({
+    name: req.params.name,
+    expiresAt: { $gt: Date.now() },
+  });
+  if (!coupon) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Coupon not found",
+    });
+  }
+  // send response with the coupon details
+  res.status(200).json({
+    status: "success",
+    data: {
+      coupon,
     },
   });
 });

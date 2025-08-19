@@ -37,3 +37,10 @@ router.get(
   couponController.getCoupons // Assuming you have a controller method for this
 );
 export default router;
+// get one
+router.get(
+  "/:name",
+  isAuthenticated,
+  isAuthorized("seller"),
+  couponController.getCoupon // Assuming you have a controller method for this
+);

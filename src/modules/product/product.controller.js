@@ -57,3 +57,31 @@ export const createProduct = asyncHandler(async (req, res) => {
     data: product,
   });
 });
+// delete product
+export const deleteProduct = asyncHandler(async (req, res, next) => {
+  // check product exist
+  const product = await Product.findById(req.params.productId);
+  if (!product) {
+    return next(new Error("Product not found", { cause: 404 }));
+  }
+  // check user is authorized to delete this product
+  if (product.createdBy.toString() !== req.user._id.toString()) {
+    return next(new Error("You are not authorized", { cause: 403 }));
+  }
+  // delete images from cloudinary
+  const ids = product.image.map((image) => image.publicId);
+  ids.push(product.defaultImage.publicId);
+  await cloudinary.api.delete_resources(ids);
+  // delete folder from cloudinary
+  await cloudinary.api.delete_folder(
+    `${process.env.CLOUD_FOULDER_NAME}/product/${product.cloudFolderName}`
+  );
+  // delete product from database
+  await Product.findByIdAndDelete(req.params.productId);
+
+  // send response
+  res.status(200).json({
+    status: "success",
+    message: "Product deleted successfully",
+  });
+});

@@ -20,5 +20,12 @@ router.post(
   validation(productSchema.createProduct),
   productController.createProduct
 );
-
+// delete product
+router.delete(
+  "/:productId",
+  isAuthenticated,
+  isAuthorized("seller"),
+  validation(productSchema.deleteProduct),
+  productController.deleteProduct
+);
 export default router;

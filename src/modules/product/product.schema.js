@@ -12,3 +12,8 @@ export const createProduct = joi
     brand: joi.string().custom(isValidateObjectId).required(),
   })
   .required();
+export const deleteProduct = joi
+  .object({
+    productId: joi.string().custom(isValidateObjectId).required(),
+  })
+  .required();

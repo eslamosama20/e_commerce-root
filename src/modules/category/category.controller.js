@@ -84,7 +84,8 @@ export const deleteCategory = asyncHandler(async (req, res, next) => {
   if (req.user._id.toString() !== category.createdBy.toString())
     return next(new Error("You are not authorized !", { cause: 403 }));
 
-  await Category.findByIdAndDelete(req.params.id);
+  await Category.deleteOne();
+  // delete subcategories associated with this category
 
   await cloudinary.uploader.destroy(category.image.id);
 
